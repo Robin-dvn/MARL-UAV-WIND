@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
 import shutil
+import time # Added import
+import json # Added import
 
 import platform
 import sys
@@ -23,7 +25,7 @@ if platform.system() == "Windows":
 # (sinon, continue l'exécution normale sous Linux / WSL)
 
 # === Paramètres ===
-angles = [0, 15, 30]
+angles = [90]
 base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
 base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
 output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
@@ -31,6 +33,8 @@ freecad_script = Path("rotate_stl.py")
 slice_script = Path("slice_and_export.py")
 
 output_dir.mkdir(exist_ok=True)
+
+script_timings = {} # To store timings
 
 for angle in angles:
     case_dir = output_dir / f"case_{angle}"
@@ -43,20 +47,26 @@ for angle in angles:
 
     rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
 
-
+    # Timer for FreeCAD script
+    freecad_start_time = time.time()
     subprocess.run([
         "freecadcmd", str(rotate_path),
         str(base_geometry),
         str(case_geometry),
         str(angle)
     ], check=True)
+    freecad_end_time = time.time()
+    script_timings[f"freecad_rotation_angle_{angle}"] = freecad_end_time - freecad_start_time
 
 
     # Lancer les commandes OpenFOAM
+    # Timer for OpenFOAM commands
+    openfoam_start_time = time.time()
     bash_cmd = f'''
     source /usr/lib/openfoam/openfoam2412/etc/bashrc
     cd {case_dir}
-
+    mkdir 0
+    cp -r 0.org/* 0
     blockMesh
     surfaceFeatureExtract
     snappyHexMesh -overwrite
@@ -65,6 +75,8 @@ for angle in angles:
     exit
     '''
     subprocess.run(["bash", "-c", bash_cmd], check=True)
+    openfoam_end_time = time.time()
+    script_timings[f"openfoam_simulation_angle_{angle}"] = openfoam_end_time - openfoam_start_time
 
     # Export slice avec ParaView
     # subprocess.run([
@@ -72,3 +84,10 @@ for angle in angles:
     #     str(case_dir / "case.foam"),
     #     str(case_dir / "slice.csv")
     # ], check=True)
+
+# Save timings to a JSON file
+timings_file_path = output_dir / "script_timings.json"
+with open(timings_file_path, 'w') as f:
+    json.dump(script_timings, f, indent=4)
+
+print(f"Timings saved to {timings_file_path}")
