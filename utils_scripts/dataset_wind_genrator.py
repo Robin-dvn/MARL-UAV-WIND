@@ -42,11 +42,7 @@ for angle in angles:
     shutil.copytree(base_case, case_dir)
 
     rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
-    print(">>> Appel FreeCAD avec :")
-    print("    rotate_stl.py")
-    print("    base_geometry =", base_geometry)
-    print("    case_geometry =", case_geometry)
-    print("    angle =", angle)
+
 
     subprocess.run([
         "freecadcmd", str(rotate_path),
@@ -57,16 +53,16 @@ for angle in angles:
 
 
     # Lancer les commandes OpenFOAM
-    # bash_cmd = f'''
-    # openfoam2412
-    # cd {case_dir}
+    bash_cmd = f'''
+    openfoam2412
+    cd {case_dir}'''
     # blockMesh
     # surfaceFeatureExtract
     # snappyHexMesh -overwrite
     # simpleFoam
     # touch case.foam
     # '''
-    # subprocess.run(["bash", "-c", bash_cmd], check=True)
+    subprocess.run(["bash", "-c", bash_cmd], check=True)
 
     # Export slice avec ParaView
     # subprocess.run([
