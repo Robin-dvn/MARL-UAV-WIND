@@ -21,7 +21,7 @@ def load_and_interpolate(csv_path):
 
 # Charger et interpoler les deux CSV
 ux1 = load_and_interpolate('assets/wind_map/ux.csv')
-ux2 = load_and_interpolate('assets/wind_map/ux2.csv')
+ux2 = load_and_interpolate(r'\\wsl.localhost\Ubuntu\home\rdavenne\OpenFOAM_cases\test_dataset\case_90\slice.csv')
 
 # Créer la figure avec deux sous-graphes
 fig = make_subplots(rows=1, cols=2, subplot_titles=["Ux - ux.csv", "Ux - ux2.csv"])
