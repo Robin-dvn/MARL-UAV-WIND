@@ -56,14 +56,15 @@ for angle in angles:
     bash_cmd = f'''
     source /usr/lib/openfoam/openfoam2412/etc/bashrc
     cd {case_dir}
-    touch case.foam
+
+    blockMesh
     exit
     '''
-    # blockMesh
     # surfaceFeatureExtract
     # snappyHexMesh -overwrite
     # simpleFoam
     # touch case.foam
+
     # '''
     subprocess.run(["bash", "-c", bash_cmd], check=True)
 
