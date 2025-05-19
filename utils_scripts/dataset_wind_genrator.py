@@ -41,13 +41,15 @@ for angle in angles:
         shutil.rmtree(case_dir)
     shutil.copytree(base_case, case_dir)
 
-    # Lancer FreeCAD pour appliquer la rotation
+    rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
+
     subprocess.run([
-        "freecadcmd", "utils_scripts/rotate_stl.py",
+        "freecadcmd", str(rotate_path),
         str(base_geometry),
         str(case_geometry),
         str(angle)
     ], check=True)
+
 
     # Lancer les commandes OpenFOAM
     # bash_cmd = f'''
