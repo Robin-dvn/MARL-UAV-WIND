@@ -4,7 +4,7 @@ import shutil
 
 # === Paramètres ===
 angles = [0, 15, 30]
-base_geometry = Path("base_geometry/buildings_original.stl")
+base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
 base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
 output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
 freecad_script = Path("rotate_stl.py")
@@ -23,7 +23,7 @@ for angle in angles:
 
     # Lancer FreeCAD pour appliquer la rotation
     subprocess.run([
-        "freecadcmd", "rotate_stl.py",
+        "freecadcmd", "utils_scripts/rotate_stl.py",
         str(base_geometry),
         str(case_geometry),
         str(angle)
