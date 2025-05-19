@@ -30,7 +30,7 @@ base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.s
 base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
 output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
 freecad_script = Path("rotate_stl.py")
-slice_script = Path("slice_and_export.py")
+slice_script = Path("utils_scripts/slice_and_export.py")
 
 output_dir.mkdir(exist_ok=True)
 
