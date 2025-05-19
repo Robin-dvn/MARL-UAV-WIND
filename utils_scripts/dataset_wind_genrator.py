@@ -58,14 +58,12 @@ for angle in angles:
     cd {case_dir}
 
     blockMesh
+    surfaceFeatureExtract
+    snappyHexMesh -overwrite
+    simpleFoam
+    touch case.foam
     exit
     '''
-    # surfaceFeatureExtract
-    # snappyHexMesh -overwrite
-    # simpleFoam
-    # touch case.foam
-
-    # '''
     subprocess.run(["bash", "-c", bash_cmd], check=True)
 
     # Export slice avec ParaView
