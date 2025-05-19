@@ -54,7 +54,7 @@ for angle in angles:
 
     # Lancer les commandes OpenFOAM
     bash_cmd = f'''
-    source /usr/bin/openfoam2412/etc/bashrc
+    source /usr/lib/openfoam/openfoam2412/etc/bashrc
     cd {case_dir}
     touch case.foam
     exit
