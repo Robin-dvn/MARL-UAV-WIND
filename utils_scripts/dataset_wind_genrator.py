@@ -2,6 +2,26 @@ import subprocess
 from pathlib import Path
 import shutil
 
+import platform
+import sys
+
+def run_in_wsl(script_name):
+    win_path = Path(script_name).resolve()
+    # Conversion chemin Windows → WSL
+    wsl_path = f"/mnt/{win_path.drive[0].lower()}/{win_path.as_posix()[3:]}"
+    print(f"Script WSL : {wsl_path}")
+    # Utiliser bash interactif pour charger ~/.bashrc et donc le PATH de uv
+    subprocess.run(["wsl", "bash", "-ic", f"uv run '{wsl_path}'"], check=True)
+
+# Si tu es sous Windows, relancer le script dans WSL
+if platform.system() == "Windows":
+    print("🔁 Passage automatique dans WSL...")
+    print(sys.argv[0])
+    run_in_wsl(sys.argv[0])
+    sys.exit()
+
+# (sinon, continue l'exécution normale sous Linux / WSL)
+
 # === Paramètres ===
 angles = [0, 15, 30]
 base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
