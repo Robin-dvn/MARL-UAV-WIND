@@ -61,29 +61,29 @@ for angle in angles:
 
     # Lancer les commandes OpenFOAM
     # Timer for OpenFOAM commands
-    openfoam_start_time = time.time()
-    bash_cmd = f'''
-    source /usr/lib/openfoam/openfoam2412/etc/bashrc
-    cd {case_dir}
-    mkdir 0
-    cp -r 0.orig/* 0
-    blockMesh
-    surfaceFeatureExtract
-    snappyHexMesh -overwrite
-    simpleFoam
-    touch case.foam
-    exit
-    '''
-    subprocess.run(["bash", "-c", bash_cmd], check=True)
-    openfoam_end_time = time.time()
-    script_timings[f"openfoam_simulation_angle_{angle}"] = openfoam_end_time - openfoam_start_time
+    # openfoam_start_time = time.time()
+    # bash_cmd = f'''
+    # source /usr/lib/openfoam/openfoam2412/etc/bashrc
+    # cd {case_dir}
+    # mkdir 0
+    # cp -r 0.orig/* 0
+    # blockMesh
+    # surfaceFeatureExtract
+    # snappyHexMesh -overwrite
+    # simpleFoam
+    # touch case.foam
+    # exit
+    # '''
+    # subprocess.run(["bash", "-c", bash_cmd], check=True)
+    # openfoam_end_time = time.time()
+    # script_timings[f"openfoam_simulation_angle_{angle}"] = openfoam_end_time - openfoam_start_time
 
     # Export slice avec ParaView
-    # subprocess.run([
-    #     "pvpython", str(slice_script),
-    #     str(case_dir / "case.foam"),
-    #     str(case_dir / "slice.csv")
-    # ], check=True)
+    subprocess.run([
+        "pvpython", str(slice_script),
+        str(case_dir / "case.foam"),
+        str(case_dir / "slice.csv")
+    ], check=True)
 
 # Save timings to a JSON file
 timings_file_path = output_dir / "script_timings.json"
