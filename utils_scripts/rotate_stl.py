@@ -4,9 +4,9 @@ import Mesh
 from FreeCAD import Base
 from pathlib import Path
 
-input_path = sys.argv[1]
-output_path = Path(sys.argv[2])
-angle = float(sys.argv[3])
+input_path = sys.argv[2]
+output_path = Path(sys.argv[3])
+angle = float(sys.argv[4])
 print(f"Rotation de {angle}° appliquée à {input_path} et enregistrée dans {output_path}")
 # Créer les dossiers parents si nécessaire
 output_path.parent.mkdir(parents=True, exist_ok=True)
