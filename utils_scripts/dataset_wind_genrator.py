@@ -66,7 +66,7 @@ for angle in angles:
     source /usr/lib/openfoam/openfoam2412/etc/bashrc
     cd {case_dir}
     mkdir 0
-    cp -r 0.org/* 0
+    cp -r 0.orig/* 0
     blockMesh
     surfaceFeatureExtract
     snappyHexMesh -overwrite
