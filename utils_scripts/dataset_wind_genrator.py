@@ -47,7 +47,7 @@ def main_script_logic():
     angles = [90] # Example with more angles
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
-    output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset_timed_final")
+    output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
     # freecad_script = Path("rotate_stl.py") # Assuming this is in the same dir or PATH - This variable is not used
     slice_script = Path("utils_scripts/slice_and_export.py") # Assuming this path is correct relative to execution
 
