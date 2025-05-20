@@ -52,7 +52,7 @@ output_path.parent.mkdir(parents=True, exist_ok=True)
 print("arguments : ", input_path, output_path, angle, snappy_path)
 # Charger le mesh
 mesh = Mesh.Mesh(str(input_path))
-
+print("✅ STL chargé.")
 # Centrer autour de l'origine
 center = mesh.BoundBox.Center
 mesh.translate(Base.Vector(-center.x, -center.y, -center.z))
