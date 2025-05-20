@@ -76,9 +76,7 @@ def main_script_logic():
             str(case_geometry),
             str(angle),
             str(snappy_dict_path)
-        ], check=True,
-            stdout=subprocess.DEVNULL if suppress_subprocess_output else None,
-            stderr=subprocess.DEVNULL if suppress_subprocess_output else None
+        ], check=True
         )
         freecad_end_time = time.time()
         script_timings[f"freecad_rotation_angle_{angle}"] = freecad_end_time - freecad_start_time
