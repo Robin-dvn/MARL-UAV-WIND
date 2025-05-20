@@ -69,24 +69,24 @@ def main_script_logic():
         rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
         snappy_dict_path = case_dir / "system/snappyHexMeshDict"
         freecad_start_time = time.time() # Timer for FreeCAD
-        try:
-            subprocess.run([
-                "freecadcmd", str(rotate_path),
-                str(base_geometry),
-                str(case_geometry),
-                str(angle),
-                str(snappy_dict_path)
-            ], check=True,
-            stdout=None if not suppress_subprocess_output else subprocess.DEVNULL,
-            stderr=None if not suppress_subprocess_output else subprocess.DEVNULL
-            )
-        except subprocess.CalledProcessError as e:
-            print(f"\n❌ FreeCAD rotation failed for angle {angle}")
-            print(f"Command: {e.cmd}")
-            print(f"Exit code: {e.returncode}")
-            if e.output:
-                print("Output:\n", e.output)
-            sys.exit(1)
+        # try:
+        #     subprocess.run([
+        #         "freecadcmd", str(rotate_path),
+        #         str(base_geometry),
+        #         str(case_geometry),
+        #         str(angle),
+        #         str(snappy_dict_path)
+        #     ], check=True,
+        #     stdout=None if not suppress_subprocess_output else subprocess.DEVNULL,
+        #     stderr=None if not suppress_subprocess_output else subprocess.DEVNULL
+        #     )
+        # except subprocess.CalledProcessError as e:
+        #     print(f"\n❌ FreeCAD rotation failed for angle {angle}")
+        #     print(f"Command: {e.cmd}")
+        #     print(f"Exit code: {e.returncode}")
+        #     if e.output:
+        #         print("Output:\n", e.output)
+        #     sys.exit(1)
 
         freecad_end_time = time.time()
         script_timings[f"freecad_rotation_angle_{angle}"] = freecad_end_time - freecad_start_time
