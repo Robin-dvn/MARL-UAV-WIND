@@ -56,7 +56,7 @@ print("✅ STL chargé.")
 # Centrer autour de l'origine
 center = mesh.BoundBox.Center
 print("Centre du mesh : ", center)
-mesh.translate(Base.Vector(-center.x, -center.y, -center.z))
+mesh.translate(-center)
 print("✅ STL centré sur l'origine.")
 # Appliquer la rotation autour de Z
 rotation = Base.Rotation(Base.Vector(0, 0, 1), angle)
