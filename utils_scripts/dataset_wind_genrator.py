@@ -66,7 +66,7 @@ def main_script_logic():
             shutil.rmtree(case_dir)
         shutil.copytree(base_case, case_dir)
 
-        rotate_path = Path("utils_scripts/rotate_and_update.py").resolve()
+        rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
         snappy_dict_path = case_dir / "system/snappyHexMeshDict"
 
         freecad_start_time = time.time()
