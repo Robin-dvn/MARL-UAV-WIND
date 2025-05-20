@@ -31,8 +31,13 @@ def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.
     }}"""
 
     text = Path(snappy_path).read_text()
-    new_text = re.sub(r'refinementBox\s*\{[^}]*\}', box_string, text, flags=re.DOTALL)
-    Path(snappy_path).write_text(new_text)
+    updated_text = re.sub(
+        r'(geometry\s*\{[^}]*?)refinementBox\s*\{[^}]*\}',
+        r'\1' + box_string,
+        text,
+        flags=re.DOTALL
+    )
+    Path(snappy_path).write_text(updated_text)
 
     print(f"✅ refinementBox mise à jour avec une marge de {int(margin*100)}%.")
 
