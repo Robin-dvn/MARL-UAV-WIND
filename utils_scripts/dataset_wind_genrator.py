@@ -23,12 +23,63 @@ import json
 from tqdm import tqdm # Added import
 import platform
 import sys
+import re # Added import
+import itertools # Added import
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
     print("ERROR: This script is designed to be run in a Linux-like environment (e.g., WSL).")
     print("Please run it from WSL or a Linux environment.")
     sys.exit(1)
+
+def update_inlet_velocity(case_dir_path: Path, velocity_x: float):
+    """
+    Updates the inlet velocity in the OpenFOAM U file by modifying the Uinlet variable.
+
+    Args:
+        case_dir_path: Path to the case directory.
+        velocity_x: The x-component of the velocity for the inlet.
+    """
+    u_file_path = case_dir_path / "0.orig" / "U"
+    if not u_file_path.exists():
+        print(f"❌ Error: U file not found at {u_file_path}")
+        return
+
+    try:
+        content = u_file_path.read_text()
+        
+        # Regex to find the Uinlet definition line, e.g., "Uinlet (10 0 0);"
+        # It captures three groups:
+        # 1. The part before the velocity values: "Uinlet          ("
+        # 2. The velocity values themselves: "10 0 0"
+        # 3. The part after the velocity values: ");"
+        pattern = re.compile(
+            r"^(Uinlet\s+\()([^)]+)(\);)",  # Matches "Uinlet (values);"
+            re.MULTILINE  # ^ matches the beginning of a line
+        )
+        
+        def replace_uinlet_velocity(match):
+            # Reconstruct the line with the new velocity_x, keeping Y and Z as 0
+            # match.group(1) is "Uinlet          ("
+            # match.group(3) is ");"
+            return f"{match.group(1)}{velocity_x} 0 0{match.group(3)}"
+
+        new_content, num_replacements = pattern.subn(replace_uinlet_velocity, content)
+
+        if num_replacements > 0:
+            u_file_path.write_text(new_content)
+            if "--suppress-output" not in sys.argv:
+                print(f"💨 Uinlet variable updated to ({velocity_x} 0 0) in {u_file_path}")
+        else:
+            print(f"⚠️ Warning: Uinlet definition line not found or not updated in {u_file_path}.")
+            print(f"   Searched for a line like 'Uinlet (...);'. Please check the U file format at {u_file_path}")
+            print(f"   If the format is different, the script may not work as expected.")
+
+
+    except Exception as e:
+        print(f"❌ Failed to update Uinlet in {u_file_path}: {e}")
+        sys.exit(1)
+
 
 def main_script_logic():
     """
@@ -45,6 +96,7 @@ def main_script_logic():
 
     # === Parameters ===
     angles = [0,45,135,180] # Example with more angles
+    velocities = [5, 10, 15] # Example velocities in m/s
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
@@ -57,14 +109,17 @@ def main_script_logic():
     total_script_start_time = time.time() # Start general timer
 
     # Use tqdm for the loop, disable if output is suppressed to avoid tqdm printing
-    for angle in tqdm(angles, desc="Processing angles", disable=suppress_subprocess_output):
-        case_dir = output_dir / f"case_{angle}"
+    for angle, velocity in tqdm(list(itertools.product(angles, velocities)), desc="Processing angle/velocity combinations", disable=suppress_subprocess_output):
+        case_dir = output_dir / f"case_angle_{angle}_vel_{velocity}"
         case_geometry = case_dir / "constant/triSurface/buildings.stl"
 
         # Copy the base case
         if case_dir.exists():
             shutil.rmtree(case_dir)
         shutil.copytree(base_case, case_dir)
+
+        # Update inlet velocity in the U file
+        update_inlet_velocity(case_dir, velocity)
 
         rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
         snappy_dict_path = case_dir / "system/snappyHexMeshDict"
@@ -85,11 +140,11 @@ def main_script_logic():
             print(f"Command: {e.cmd}")
             print(f"Exit code: {e.returncode}")
             if e.output:
-                print("Output:\n", e.output)
+                print("Output:\\n", e.output)
             sys.exit(1)
 
         freecad_end_time = time.time()
-        script_timings[f"freecad_rotation_angle_{angle}"] = freecad_end_time - freecad_start_time
+        script_timings[f"freecad_rotation_angle_{angle}_vel_{velocity}"] = freecad_end_time - freecad_start_time
 
 
         # Run OpenFOAM commands
@@ -108,7 +163,7 @@ def main_script_logic():
         """
         subprocess.run(["bash", "-c", bash_cmd], check=True, stdout=subprocess.DEVNULL if suppress_subprocess_output else None, stderr=subprocess.DEVNULL if suppress_subprocess_output else None)
         openfoam_end_time = time.time()
-        script_timings[f"openfoam_simulation_angle_{angle}"] = openfoam_end_time - openfoam_start_time
+        script_timings[f"openfoam_simulation_angle_{angle}_vel_{velocity}"] = openfoam_end_time - openfoam_start_time
 
         # Export slice with ParaView
         paraview_start_time = time.time() # Timer for ParaView
@@ -118,7 +173,7 @@ def main_script_logic():
             str(case_dir / "slice.csv")
         ], check=True, stdout=subprocess.DEVNULL if suppress_subprocess_output else None, stderr=subprocess.DEVNULL if suppress_subprocess_output else None)
         paraview_end_time = time.time() # End timer for ParaView
-        script_timings[f"paraview_slice_export_angle_{angle}"] = paraview_end_time - paraview_start_time # Store ParaView timing
+        script_timings[f"paraview_slice_export_angle_{angle}_vel_{velocity}"] = paraview_end_time - paraview_start_time # Store ParaView timing
 
     total_script_end_time = time.time() # End general timer
     script_timings["total_script_duration"] = total_script_end_time - total_script_start_time # Store general timing
