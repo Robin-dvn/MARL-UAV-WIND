@@ -26,7 +26,7 @@ import sys
 import re # Added import
 import itertools # Added import
 
-from utils_scripts.visualize_wind_map import load_and_interpolate, extract_rotated_crop, plot_ux_uy # Added imports
+from visualize_wind_map import load_and_interpolate, extract_rotated_crop, plot_ux_uy # Added imports
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
