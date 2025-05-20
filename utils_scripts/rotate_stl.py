@@ -32,33 +32,9 @@ def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.
 
     text = Path(snappy_path).read_text()
     # 1. Extraire bloc geometry { ... }
-    match = re.search(r'(geometry\s*\{.*?\n\})(.*?)(^\})', text, flags=re.DOTALL | re.MULTILINE)
-    if not match:
-        print("❌ Bloc geometry non trouvé dans snappyHexMeshDict.")
-        return
-
-    geometry_header = match.group(1)
-    geometry_body = match.group(2)
-    geometry_footer = match.group(3)
-
-    # 2. Remplacer uniquement le refinementBox dans le body
-    geometry_body_updated = re.sub(
-        r'refinementBox\s*\{[^}]*\}',
-        box_string,
-        geometry_body,
-        flags=re.DOTALL
-    )
-
-    # 3. Reconstruire le bloc geometry
-    geometry_block_updated = geometry_header + geometry_body_updated + geometry_footer
-
-    # 4. Remplacer dans le texte complet
-    text_updated = re.sub(
-        r'geometry\s*\{.*?^\}', geometry_block_updated,
-        text,
-        flags=re.DOTALL | re.MULTILINE
-    )
-    Path(snappy_path).write_text(text_updated)
+    pattern = r'refinementBox\s*\{[^}]*?(type\s+[^\n]*;)[^}]*?(min\s+[^\n]*;)[^}]*?(max\s+[^\n]*;)[^}]*?\}'
+    updated_text = re.sub(pattern, box_string, text, count=1, flags=re.DOTALL)
+    Path(snappy_path).write_text(updated_text)
 
     print(f"✅ refinementBox mise à jour avec une marge de {int(margin*100)}%.")
 
