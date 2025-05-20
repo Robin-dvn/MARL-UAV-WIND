@@ -61,16 +61,18 @@ bbox = mesh.BoundBox
 center = Base.Vector(
     (bbox.XMin + bbox.XMax) / 2,
     (bbox.YMin + bbox.YMax) / 2,
-    (bbox.ZMin + bbox.ZMax) / 2
+    0    
 )
-
+pos = Base.Vector(
+    0, 0, 0
+)
 print("📍 Centre du mesh :", center)
 
 # Définir la rotation autour de Z
 rotation = Base.Rotation(Base.Vector(0, 0, 1), angle)
 
 # Appliquer la rotation autour du centre (rotation sur place)
-placement = Base.Placement(center,rotation)
+placement = Base.Placement(pos,rotation,center)
 mesh.Placement = placement
 
 print("✅ Rotation sur place appliquée.")
