@@ -66,18 +66,23 @@ def main_script_logic():
             shutil.rmtree(case_dir)
         shutil.copytree(base_case, case_dir)
 
-        rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
+        rotate_path = Path("utils_scripts/rotate_and_update.py").resolve()
+        snappy_dict_path = case_dir / "system/snappyHexMeshDict"
 
-        # Timer for FreeCAD script
         freecad_start_time = time.time()
         subprocess.run([
             "freecadcmd", str(rotate_path),
             str(base_geometry),
             str(case_geometry),
-            str(angle)
-        ], check=True, stdout=subprocess.DEVNULL if suppress_subprocess_output else None, stderr=subprocess.DEVNULL if suppress_subprocess_output else None)
+            str(angle),
+            str(snappy_dict_path)
+        ], check=True,
+            stdout=subprocess.DEVNULL if suppress_subprocess_output else None,
+            stderr=subprocess.DEVNULL if suppress_subprocess_output else None
+        )
         freecad_end_time = time.time()
         script_timings[f"freecad_rotation_angle_{angle}"] = freecad_end_time - freecad_start_time
+
 
         # Run OpenFOAM commands
         openfoam_start_time = time.time()
