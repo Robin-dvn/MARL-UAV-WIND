@@ -54,6 +54,16 @@ print("arguments : ", input_path, output_path, angle, snappy_path)
 mesh = Mesh.Mesh(str(input_path))
 print("✅ STL chargé.")
 # Centrer autour de l'origine
+bbox = mesh.BoundBox
+cx = (bbox.XMin + bbox.XMax) / 2
+cy = (bbox.YMin + bbox.YMax) / 2
+cz = (bbox.ZMin + bbox.ZMax) / 2
+center = Base.Vector(cx, cy, cz)
+
+print("Centre du mesh : ", center)
+mesh.translate(-center)
+print("✅ STL centré sur l'origine.")
+
 center = mesh.BoundBox.Center
 print("Centre du mesh : ", center)
 mesh.translate(-center)
