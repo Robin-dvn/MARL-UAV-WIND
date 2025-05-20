@@ -37,9 +37,7 @@ def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.
 
 
 # === Lecture des arguments ===
-if len(sys.argv) != 5:
-    print("Usage: freecadcmd rotate_and_update.py <input.stl> <output.stl> <angle> <snappyHexMeshDict>")
-    sys.exit(1)
+
 
 input_path = Path(sys.argv[2])
 output_path = Path(sys.argv[3])
