@@ -58,21 +58,25 @@ mesh = Mesh.Mesh(str(input_path))
 print("✅ STL chargé.")
 # Calcul du centre du mesh (bounding box)
 bbox = mesh.BoundBox
-center = Base.Vector(
+center_2d_for_rotation = Base.Vector(
     (bbox.XMin + bbox.XMax) / 2,
     (bbox.YMin + bbox.YMax) / 2,
     0    
 )
+# Calculer et imprimer le centre 3D réel de la bounding box
+actual_center_3d = bbox.Center
+print(f"GEOMETRY_CENTER:{actual_center_3d.x},{actual_center_3d.y},{actual_center_3d.z}")
+
 pos = Base.Vector(
     0, 0, 0
 )
-print("📍 Centre du mesh :", center)
+print("📍 Centre du mesh (pour rotation Z) :", center_2d_for_rotation)
 
 # Définir la rotation autour de Z
 rotation = Base.Rotation(Base.Vector(0, 0, 1), angle)
 
 # Appliquer la rotation autour du centre (rotation sur place)
-placement = Base.Placement(pos,rotation,center)
+placement = Base.Placement(pos,rotation,center_2d_for_rotation) # Utilise le centre 2D pour la rotation Z
 mesh.Placement = placement
 
 print("✅ Rotation sur place appliquée.")

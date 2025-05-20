@@ -124,27 +124,54 @@ def main_script_logic():
         rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
         snappy_dict_path = case_dir / "system/snappyHexMeshDict"
         freecad_start_time = time.time() # Timer for FreeCAD
+        geometry_center = None # Initialize variable to store center
         try:
-            subprocess.run([
+            process_result = subprocess.run([
                 "freecadcmd", str(rotate_path),
                 str(base_geometry),
                 str(case_geometry),
                 str(angle),
                 str(snappy_dict_path)
             ], check=True,
-            stdout=None if not suppress_subprocess_output else subprocess.DEVNULL,
-            stderr=None if not suppress_subprocess_output else subprocess.DEVNULL
+            capture_output=True, text=True # Capture output
+            # stdout=None if not suppress_subprocess_output else subprocess.DEVNULL, # Will be replaced by capture_output
+            # stderr=None if not suppress_subprocess_output else subprocess.DEVNULL # Will be replaced by capture_output
             )
+            
+            # Process stdout to find the geometry center
+            if process_result.stdout:
+                if not suppress_subprocess_output:
+                    print(process_result.stdout) # Print FreeCAD output if not suppressed
+                for line in process_result.stdout.splitlines():
+                    if line.startswith("GEOMETRY_CENTER:"):
+                        try:
+                            coords_str = line.split(":")[1]
+                            x, y, z = map(float, coords_str.split(','))
+                            geometry_center = {"x": x, "y": y, "z": z}
+                            if not suppress_subprocess_output:
+                                print(f"Extracted geometry center: {geometry_center}")
+                            break 
+                        except Exception as e:
+                            if not suppress_subprocess_output:
+                                print(f"⚠️ Could not parse geometry center from line: {line} - Error: {e}")
+            if process_result.stderr and not suppress_subprocess_output:
+                print(process_result.stderr, file=sys.stderr)
+
+
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ FreeCAD rotation failed for angle {angle}")
+            print(f"\\n❌ FreeCAD rotation failed for angle {angle}")
             print(f"Command: {e.cmd}")
             print(f"Exit code: {e.returncode}")
-            if e.output:
-                print("Output:\\n", e.output)
+            if e.stdout: # Changed from e.output to e.stdout
+                print("Stdout:\\n", e.stdout)
+            if e.stderr: # Added stderr printing
+                print("Stderr:\\n", e.stderr)
             sys.exit(1)
 
         freecad_end_time = time.time()
         script_timings[f"freecad_rotation_angle_{angle}_vel_{velocity}"] = freecad_end_time - freecad_start_time
+        if geometry_center:
+            script_timings[f"geometry_center_angle_{angle}_vel_{velocity}"] = geometry_center
 
 
         # Run OpenFOAM commands
