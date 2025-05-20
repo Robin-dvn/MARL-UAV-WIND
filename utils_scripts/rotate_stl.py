@@ -49,7 +49,7 @@ print(f"📦 STL sauvegardé dans {output_path}")
 
 # Créer le dossier de sortie si nécessaire
 output_path.parent.mkdir(parents=True, exist_ok=True)
-
+print("arguments : ", input_path, output_path, angle, snappy_path)
 # Charger le mesh
 mesh = Mesh.Mesh(str(input_path))
 
