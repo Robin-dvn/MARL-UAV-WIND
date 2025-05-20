@@ -53,13 +53,14 @@ def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path p
     fig.add_trace(go.Heatmap(z=ux_crop.T, colorscale="RdBu_r", colorbar=dict(title="Ux")), row=1, col=1)
     fig.add_trace(go.Heatmap(z=uy_crop.T, colorscale="RdBu_r", colorbar=dict(title="Uy")), row=1, col=2)
 
-    fig.update_layout(title_text=f"Vent vu depuis la ville (référentiel fixe, angle={angle_deg}°)", ) # Updated title
+    fig.update_layout(title_text=f"Vent vu depuis la ville (référentiel fixe, angle={angle_deg}°)" ) # Updated title
 
     if save_path:
         try:
             fig.write_image(str(save_path))
             if not "--suppress-output" in sys.argv: # Check if output is suppressed
                  print(f"✅ Plot saved to {save_path}")
+            fig.show()    
         except Exception as e:
             if not "--suppress-output" in sys.argv: # Check if output is suppressed
                 print(f"❌ Failed to save plot to {save_path}: {e}")
