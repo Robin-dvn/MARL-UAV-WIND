@@ -44,7 +44,7 @@ def main_script_logic():
     suppress_subprocess_output = "--suppress-output" in sys.argv
 
     # === Parameters ===
-    angles = [90] # Example with more angles
+    angles = [0,45,135,180] # Example with more angles
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
