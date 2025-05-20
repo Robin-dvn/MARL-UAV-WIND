@@ -68,6 +68,7 @@ def main_script_logic():
 
         rotate_path = Path("utils_scripts/rotate_stl.py").resolve()
         snappy_dict_path = case_dir / "system/snappyHexMeshDict"
+        freecad_start_time = time.time() # Timer for FreeCAD
         try:
             subprocess.run([
                 "freecadcmd", str(rotate_path),
