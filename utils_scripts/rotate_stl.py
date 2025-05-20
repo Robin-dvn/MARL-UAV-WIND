@@ -65,10 +65,10 @@ mesh.Placement = placement
 
 # Replacer au centre initial (optionnel, sinon reste centré sur origine)
 mesh.translate(Base.Vector(center.x, center.y, center.z))
-
+print("✅ Rotation appliquée.")
 # Sauvegarder
 mesh.write(str(output_path))
-
+print("✅ STL sauvegardé.")
 # Mettre à jour la refinementBox
 update_refinement_box(output_path, snappy_path)
 
