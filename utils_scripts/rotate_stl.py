@@ -22,12 +22,13 @@ def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.
     ymin = cy - diag / 2
     ymax = cy + diag / 2
 
-    box_string = f"""        refinementBox
-        {{
-            type searchableBox;
-            min ({xmin:.3f} {ymin:.3f} {zmin:.3f});
-            max ({xmax:.3f} {ymax:.3f} {zmax:.3f});
-        }}"""
+    box_string = f"""
+    refinementBox
+    {{
+        type box;
+        min ({xmin:.3f} {ymin:.3f} {zmin:.3f});
+        max ({xmax:.3f} {ymax:.3f} {zmax:.3f});
+    }}"""
 
     text = Path(snappy_path).read_text()
     new_text = re.sub(r'refinementBox\s*\{[^}]*\}', box_string, text, flags=re.DOTALL)
