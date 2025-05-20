@@ -56,14 +56,18 @@ def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path p
     fig.update_layout(title_text=f"Vent vu depuis la ville (référentiel fixe, angle={angle_deg}°)" ) # Updated title
 
     if save_path:
+        resolved_save_path = Path(save_path).resolve()
+        print(f"ℹ️ Attempting to save plot to: {resolved_save_path}") # Print absolute path
         try:
-            fig.write_image(str(save_path))
-            if not "--suppress-output" in sys.argv: # Check if output is suppressed
-                 print(f"✅ Plot saved to {save_path}")
-            fig.show()    
+            fig.write_image(str(resolved_save_path))
+            # Only print success if not suppressed, as per original logic
+            if "--suppress-output" not in sys.argv: 
+                 print(f"✅ Plot saved to {resolved_save_path}")
         except Exception as e:
-            if not "--suppress-output" in sys.argv: # Check if output is suppressed
-                print(f"❌ Failed to save plot to {save_path}: {e}")
+            # Always print the error for fig.write_image failure, as it's critical for debugging
+            print(f"❌ CRITICAL: Failed to save plot to {resolved_save_path}: {e}")
+            import traceback
+            print(traceback.format_exc()) # Print full traceback for the error
     else:
         fig.show()
 

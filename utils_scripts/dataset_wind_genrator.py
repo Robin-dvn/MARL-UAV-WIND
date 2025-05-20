@@ -228,6 +228,7 @@ def main_script_logic():
                 )
                 
                 plot_save_path = visualization_output_dir / f"wind_map_angle_{angle}_vel_{velocity}.png"
+                
                 # Utiliser l'angle actuel pour le titre du graphique, car c'est l'angle de la géométrie
                 plot_ux_uy(ux_crop, uy_crop, angle, save_path=plot_save_path)
                 # Le message de succès est déjà dans plot_ux_uy si non supprimé
