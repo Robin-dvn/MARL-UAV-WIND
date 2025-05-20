@@ -17,10 +17,10 @@ def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.
     cx = bbox.Center.x
     cy = bbox.Center.y
 
-    xmin = cx - diag / 2
-    xmax = cx + diag / 2
-    ymin = cy - diag / 2
-    ymax = cy + diag / 2
+    xmin = int(cx - diag / 2)
+    xmax = int(cx + diag / 2)
+    ymin = int(cy - diag / 2)
+    ymax = int(cy + diag / 2)
 
     box_string = f"""
     refinementBox
