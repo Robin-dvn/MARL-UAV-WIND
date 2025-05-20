@@ -26,6 +26,8 @@ import sys
 import re # Added import
 import itertools # Added import
 
+from utils_scripts.visualize_wind_map import load_and_interpolate, extract_rotated_crop, plot_ux_uy # Added imports
+
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
     print("ERROR: This script is designed to be run in a Linux-like environment (e.g., WSL).")
@@ -95,15 +97,19 @@ def main_script_logic():
     suppress_subprocess_output = "--suppress-output" in sys.argv
 
     # === Parameters ===
-    angles = [0,45,135,180] # Example with more angles
-    velocities = [5, 10, 15] # Example velocities in m/s
+    angles = [45] # Example with more angles
+    velocities = [15] # Example velocities in m/s
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
     # freecad_script = Path("rotate_stl.py") # Assuming this is in the same dir or PATH - This variable is not used
     slice_script = Path("utils_scripts/slice_and_export.py") # Assuming this path is correct relative to execution
+    visualization_output_dir = output_dir / "visualizations" # Directory for saving plots
+    crop_size_visualization = (230.0, 230.0)  # Taille du domaine autour de la ville pour la visualisation
+    output_resolution_visualization = (2000, 2000) # Résolution de l'image de visualisation
 
     output_dir.mkdir(exist_ok=True)
+    visualization_output_dir.mkdir(exist_ok=True) # Create visualization directory
 
     script_timings = {} # To store timings
     total_script_start_time = time.time() # Start general timer
@@ -194,13 +200,45 @@ def main_script_logic():
 
         # Export slice with ParaView
         paraview_start_time = time.time() # Timer for ParaView
+        csv_slice_path = case_dir / "slice.csv"
         subprocess.run([
             "pvpython", str(slice_script),
             str(case_dir / "case.foam"),
-            str(case_dir / "slice.csv")
+            str(csv_slice_path) # Use variable for csv path
         ], check=True, stdout=subprocess.DEVNULL if suppress_subprocess_output else None, stderr=subprocess.DEVNULL if suppress_subprocess_output else None)
         paraview_end_time = time.time() # End timer for ParaView
         script_timings[f"paraview_slice_export_angle_{angle}_vel_{velocity}"] = paraview_end_time - paraview_start_time # Store ParaView timing
+
+        # Generate and save wind map visualization
+        if geometry_center and csv_slice_path.exists():
+            if not suppress_subprocess_output:
+                print(f"🔄 Generating visualization for angle {angle}, velocity {velocity}...")
+            try:
+                x_vec, y_vec, ux_grid, uy_grid = load_and_interpolate(csv_slice_path)
+                # Utiliser les coordonnées x, y du centre extraites (ignorer z pour la 2D)
+                center_2d_visualization = (geometry_center['x'], geometry_center['y'])
+                
+                ux_crop, uy_crop = extract_rotated_crop(
+                    x_vec, y_vec, 
+                    ux_grid, uy_grid, 
+                    center_2d_visualization, 
+                    crop_size_visualization, 
+                    angle, # Utiliser l'angle de rotation actuel de la géométrie
+                    output_res=output_resolution_visualization
+                )
+                
+                plot_save_path = visualization_output_dir / f"wind_map_angle_{angle}_vel_{velocity}.png"
+                # Utiliser l'angle actuel pour le titre du graphique, car c'est l'angle de la géométrie
+                plot_ux_uy(ux_crop, uy_crop, angle, save_path=plot_save_path)
+                # Le message de succès est déjà dans plot_ux_uy si non supprimé
+            except Exception as e:
+                if not suppress_subprocess_output:
+                    print(f"❌ Failed to generate visualization for angle {angle}, velocity {velocity}: {e}")
+        elif not geometry_center and not suppress_subprocess_output:
+            print(f"⚠️ Skipping visualization for angle {angle}, velocity {velocity} due to missing geometry center.")
+        elif not csv_slice_path.exists() and not suppress_subprocess_output:
+            print(f"⚠️ Skipping visualization for angle {angle}, velocity {velocity} due to missing CSV slice file: {csv_slice_path}")
+
 
     total_script_end_time = time.time() # End general timer
     script_timings["total_script_duration"] = total_script_end_time - total_script_start_time # Store general timing

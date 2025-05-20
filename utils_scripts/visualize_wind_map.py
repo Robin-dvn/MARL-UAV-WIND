@@ -4,6 +4,7 @@ from scipy.interpolate import griddata, interpn
 from pathlib import Path
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import sys # Added import for sys
 
 def load_and_interpolate(csv_path: Path, grid_shape=(2000, 2000)):
     df = pd.read_csv(csv_path)
@@ -46,14 +47,24 @@ def extract_rotated_crop(x_vec, y_vec, ux, uy, center, crop_size, angle_deg, out
 
     return ux_crop.reshape(Nx, Ny), uy_crop.reshape(Nx, Ny)
 
-def plot_ux_uy(ux_crop, uy_crop, angle_deg):
+def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path parameter
     fig = make_subplots(rows=1, cols=2, subplot_titles=[f"Ux (θ={angle_deg}°)", f"Uy (θ={angle_deg}°)"])
 
     fig.add_trace(go.Heatmap(z=ux_crop.T, colorscale="RdBu_r", colorbar=dict(title="Ux")), row=1, col=1)
     fig.add_trace(go.Heatmap(z=uy_crop.T, colorscale="RdBu_r", colorbar=dict(title="Uy")), row=1, col=2)
 
-    fig.update_layout(title_text="Vent vu depuis la ville (référentiel fixe)", )
-    fig.show()
+    fig.update_layout(title_text=f"Vent vu depuis la ville (référentiel fixe, angle={angle_deg}°)", ) # Updated title
+
+    if save_path:
+        try:
+            fig.write_image(str(save_path))
+            if not "--suppress-output" in sys.argv: # Check if output is suppressed
+                 print(f"✅ Plot saved to {save_path}")
+        except Exception as e:
+            if not "--suppress-output" in sys.argv: # Check if output is suppressed
+                print(f"❌ Failed to save plot to {save_path}: {e}")
+    else:
+        fig.show()
 
 # --- Exemple d'utilisation ---
 if __name__ == "__main__":
