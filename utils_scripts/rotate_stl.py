@@ -53,29 +53,25 @@ print("arguments : ", input_path, output_path, angle, snappy_path)
 # Charger le mesh
 mesh = Mesh.Mesh(str(input_path))
 print("✅ STL chargé.")
-# Centrer autour de l'origine
+# Calcul du centre du mesh (bounding box)
 bbox = mesh.BoundBox
-cx = (bbox.XMin + bbox.XMax) / 2
-cy = (bbox.YMin + bbox.YMax) / 2
-cz = (bbox.ZMin + bbox.ZMax) / 2
-center = Base.Vector(cx, cy, cz)
+center = Base.Vector(
+    (bbox.XMin + bbox.XMax) / 2,
+    (bbox.YMin + bbox.YMax) / 2,
+    (bbox.ZMin + bbox.ZMax) / 2
+)
 
-print("Centre du mesh : ", center)
-mesh.translate(-center)
-print("✅ STL centré sur l'origine.")
+print("📍 Centre du mesh :", center)
 
-center = mesh.BoundBox.Center
-print("Centre du mesh : ", center)
-mesh.translate(-center)
-print("✅ STL centré sur l'origine.")
-# Appliquer la rotation autour de Z
+# Définir la rotation autour de Z
 rotation = Base.Rotation(Base.Vector(0, 0, 1), angle)
-placement = Base.Placement()
-placement.Rotation = rotation
+
+# Appliquer la rotation autour du centre (rotation sur place)
+placement = Base.Placement(rotation, center)
 mesh.Placement = placement
-print("✅ Rotation appliquée.0")
-# Replacer au centre initial (optionnel, sinon reste centré sur origine)
-mesh.translate(Base.Vector(center.x, center.y, center.z))
+
+print("✅ Rotation sur place appliquée.")
+
 print("✅ Rotation appliquée.")
 # Sauvegarder
 mesh.write(str(output_path))
