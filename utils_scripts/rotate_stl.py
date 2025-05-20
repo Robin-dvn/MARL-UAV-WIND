@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import re
 
-def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.0, zmax=40.0):
+def update_refinement_box(stl_path: Path, snappy_path: Path, margin=0.1, zmin=0.0, zmax=85):
     mesh = Mesh.Mesh(str(stl_path))
     bbox = mesh.BoundBox
 
