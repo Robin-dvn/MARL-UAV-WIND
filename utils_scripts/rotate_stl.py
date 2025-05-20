@@ -67,7 +67,7 @@ print("📍 Centre du mesh :", center)
 rotation = Base.Rotation(Base.Vector(0, 0, 1), angle)
 
 # Appliquer la rotation autour du centre (rotation sur place)
-placement = Base.Placement(rotation, center)
+placement = Base.Placement(center,rotation)
 mesh.Placement = placement
 
 print("✅ Rotation sur place appliquée.")
