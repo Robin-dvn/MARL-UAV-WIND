@@ -57,7 +57,7 @@ def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path p
     img_bytes = fig.to_image(format="png", width=800, height=600)
 
     # Écrire l’image sur disque manuellement
-    with open("fallback_output.png", "wb") as f:
+    with open(save_path, "wb") as f:
         f.write(img_bytes)
 
     print("✅ Image sauvegardée via to_image()")
