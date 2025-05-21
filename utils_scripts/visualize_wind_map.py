@@ -67,8 +67,8 @@ def export_simulated_data_arrays(ux_crop: np.ndarray, uy_crop: np.ndarray, save_
     Saves the cropped simulated Ux and Uy data arrays as .npy files.
     No logging or extensive error handling.
     """
-    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_ux_sim.npy"), ux_crop)
-    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_uy_sim.npy"), uy_crop)
+    np.save(f"{str(save_prefix_path)}_ux_sim.npy", ux_crop)
+    np.save(f"{str(save_prefix_path)}_uy_sim.npy", uy_crop)
 
 def export_incident_data_arrays(base_velocity: float, angle_deg: float, output_resolution: tuple[int, int], save_prefix_path: Path):
     """
@@ -89,8 +89,8 @@ def export_incident_data_arrays(base_velocity: float, angle_deg: float, output_r
     incident_ux_array = np.full(output_resolution, ux_incident_component, dtype=np.float32)
     incident_uy_array = np.full(output_resolution, uy_incident_component, dtype=np.float32)
 
-    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_ux_incident.npy"), incident_ux_array)
-    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_uy_incident.npy"), incident_uy_array)
+    np.save(f"{str(save_prefix_path)}_ux_incident.npy", incident_ux_array)
+    np.save(f"{str(save_prefix_path)}_uy_incident.npy", incident_uy_array)
 
 # --- Exemple d'utilisation ---
 if __name__ == "__main__":
