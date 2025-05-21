@@ -26,7 +26,7 @@ import sys
 import re # Added import
 import itertools # Added import
 
-from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays # Updated imports
+from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays,plot_ux_uy # Updated imports
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
@@ -229,7 +229,10 @@ def main_script_logic():
                 
                 # Define the prefix for the output .npy files
                 save_prefix_path = visualization_output_dir / f"wind_data_angle_{angle}_vel_{velocity}"
-                
+                plot_ux_uy(
+                    ux_crop, uy_crop, angle,
+                    save_path=save_prefix_path.with_suffix(".png") # Save the plot as a PNG
+                )
                 # Export simulated wind data arrays (Ux_sim, Uy_sim)
                 export_simulated_data_arrays(
                     ux_crop=ux_crop,
