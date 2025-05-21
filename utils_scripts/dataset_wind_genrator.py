@@ -25,6 +25,7 @@ import platform
 import sys
 import re # Added import
 import itertools # Added import
+import random # Added import for random number generation
 
 from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays , plot_ux_uy # plot_ux_uy commented out
 
@@ -97,8 +98,14 @@ def main_script_logic():
     suppress_subprocess_output = "--suppress-output" in sys.argv
 
     # === Parameters ===
-    angles = [45,0,5,7,90,98,178,270] # Example with more angles
-    velocities = [15] # Example velocities in m/s
+    # angles = [45,0,5,7,90,98,178,270] # Example with more angles - Replaced by random generation
+    # velocities = [15] # Example velocities in m/s - Replaced by random generation
+    nb_couples = 10  # Number of angle-velocity pairs to generate
+    velocity_min_mps = 5.0  # Minimum velocity in m/s
+    velocity_max_mps = 25.0 # Maximum velocity in m/s
+    angle_min_deg = 0.0     # Minimum angle in degrees
+    angle_max_deg = 360.0   # Maximum angle in degrees (exclusive for random.uniform, but 360 is fine for full circle)
+
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
@@ -116,9 +123,22 @@ def main_script_logic():
     script_timings = {} # To store timings
     total_script_start_time = time.time() # Start general timer
 
+    # Generate angle-velocity pairs
+    angle_velocity_pairs = []
+    for _ in range(nb_couples):
+        angle = random.uniform(angle_min_deg, angle_max_deg)
+        velocity = random.uniform(velocity_min_mps, velocity_max_mps)
+        angle_velocity_pairs.append((angle, velocity))
+
     # Use tqdm for the loop, disable if output is suppressed to avoid tqdm printing
-    for angle, velocity in tqdm(list(itertools.product(angles, velocities)), desc="Processing angle/velocity combinations", disable=suppress_subprocess_output):
-        case_dir = output_dir / f"case_angle_{angle}_vel_{velocity}"
+    # for angle, velocity in tqdm(list(itertools.product(angles, velocities)), desc="Processing angle/velocity combinations", disable=suppress_subprocess_output):
+    for angle, velocity in tqdm(angle_velocity_pairs, desc="Processing angle/velocity combinations", disable=suppress_subprocess_output):
+        # Round angle and velocity for directory naming to avoid overly long/precise float names
+        # You can adjust the precision as needed
+        angle_for_naming = round(angle, 2)
+        velocity_for_naming = round(velocity, 2)
+
+        case_dir = output_dir / f"case_angle_{angle_for_naming}_vel_{velocity_for_naming}"
         case_geometry = case_dir / "constant/triSurface/buildings.stl"
 
         # Copy the base case
@@ -230,7 +250,7 @@ def main_script_logic():
                 )
                 
                 # Define the case-specific directory and ensure it exists
-                case_specific_dir = dataset_processed_dir / f"case_angle_{angle}_vel_{velocity}"
+                case_specific_dir = dataset_processed_dir / f"case_angle_{angle_for_naming}_vel_{velocity_for_naming}"
                 case_specific_dir.mkdir(parents=True, exist_ok=True)
 
                 # Define the prefix for the output files within the case-specific directory
@@ -257,6 +277,7 @@ def main_script_logic():
                 )
 
                 # Save metadata (angle and velocity) to a JSON file
+                # Use the original, non-rounded angle and velocity for metadata accuracy
                 metadata = {"angle_deg": float(angle), "velocity_mps": float(velocity)}
                 metadata_save_path = Path(f"{str(save_prefix_path)}_metadata.json") # Path will be case_specific_dir / "wind_data_metadata.json"
                 with open(metadata_save_path, 'w') as f_meta:
