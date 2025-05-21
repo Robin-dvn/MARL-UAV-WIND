@@ -238,7 +238,7 @@ def main_script_logic():
                 
                 plot_ux_uy(
                     ux_crop, uy_crop, angle,
-                    save_path=save_prefix_path.with_suffix("_visu.png") # Save the plot as a PNG
+                    save_path=str(save_prefix_path)+"_visu.png") # Save the plot as a PNG
                 ) # Commented out as per discussion, focus on .npy and .json for dataset
 
                 # Export simulated wind data arrays (Ux_sim, Uy_sim)
