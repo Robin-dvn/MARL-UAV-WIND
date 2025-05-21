@@ -54,8 +54,15 @@ def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path p
     fig.add_trace(go.Heatmap(z=uy_crop.T, colorscale="RdBu_r", colorbar=dict(title="Uy")), row=1, col=2)
 
     fig.update_layout(title_text=f"Vent vu depuis la ville (référentiel fixe, angle={angle_deg}°)" ) # Updated title
+    img_bytes = fig.to_image(format="png", width=800, height=600)
 
-    fig.write_image(save_path) if save_path else None
+    # Écrire l’image sur disque manuellement
+    with open("fallback_output.png", "wb") as f:
+        f.write(img_bytes)
+
+    print("✅ Image sauvegardée via to_image()")
+
+
 # --- Exemple d'utilisation ---
 if __name__ == "__main__":
     csv_path = Path("assets/wind_map/ux.csv")
@@ -66,4 +73,4 @@ if __name__ == "__main__":
     angle = 0.0               # rotation de la ville
 
     ux_crop, uy_crop = extract_rotated_crop(x_vec, y_vec, ux, uy, center, crop_size, angle)
-    plot_ux_uy(ux_crop, uy_crop, angle)
+    plot_ux_uy(ux_crop, uy_crop, angle,"./image.png")
