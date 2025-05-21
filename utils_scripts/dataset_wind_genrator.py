@@ -28,6 +28,14 @@ import itertools # Added import
 import random # Added import for random number generation
 
 from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays , plot_ux_uy # plot_ux_uy commented out
+import numpy as np
+import cv2
+from pathlib import Path
+
+def save_heatmap_cv2(array: np.ndarray, path: str, vmin: float, vmax: float):
+    norm = np.uint8(255 * np.clip((array - vmin) / (vmax - vmin), 0, 1))
+    heatmap = cv2.applyColorMap(norm, cv2.COLORMAP_VIRIDIS)
+    cv2.imwrite(str(Path(path)), heatmap)
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
@@ -102,10 +110,11 @@ def main_script_logic():
     # velocities = [15] # Example velocities in m/s - Replaced by random generation
     nb_couples = 10  # Number of angle-velocity pairs to generate
     velocity_min_mps = 5.0  # Minimum velocity in m/s
-    velocity_max_mps = 25.0 # Maximum velocity in m/s
+    velocity_max_mps = 10.0 # Maximum velocity in m/s
     angle_min_deg = 0.0     # Minimum angle in degrees
     angle_max_deg = 360.0   # Maximum angle in degrees (exclusive for random.uniform, but 360 is fine for full circle)
-
+    vmin_scale = -20.0  # Minimum scale for heatmap
+    vmax_scale = 20.0 # Scale for the color map in heatmap visualization
     base_geometry = Path("/mnt/c/Users/r.davenne/Documents/geometry/base_buildings.stl")
     base_case = Path("/home/rdavenne/OpenFOAM_cases/windAroundBuildings")
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
@@ -262,19 +271,22 @@ def main_script_logic():
                 ) # Commented out as per discussion, focus on .npy and .json for dataset
 
                 # Export simulated wind data arrays (Ux_sim, Uy_sim)
-                export_simulated_data_arrays(
-                    ux_crop=ux_crop,
-                    uy_crop=uy_crop,
-                    save_prefix_path=save_prefix_path 
-                )
+                save_heatmap_cv2(
+                    ux_crop, str(save_prefix_path)+"_ux_sim.png", vmin=vmin_scale, vmax=vmax_scale)
+                save_heatmap_cv2(
+                    uy_crop, str(save_prefix_path)+"_uy_sim.png", vmin=vmin_scale, vmax=vmax_scale)
 
                 # Export incident wind data arrays (Ux_incident, Uy_incident)
-                export_incident_data_arrays(
-                    base_velocity=float(velocity), 
-                    angle_deg=float(angle),
-                    output_resolution=output_resolution_visualization,
-                    save_prefix_path=save_prefix_path
-                )
+                theta_rad = np.deg2rad(angle)
+
+                ux_val = velocity * np.cos(theta_rad)
+                uy_val = -velocity * np.sin(theta_rad)
+
+                incident_ux = np.full(output_resolution_visualization, ux_val, dtype=np.float32)
+                incident_uy = np.full(output_resolution_visualization, uy_val, dtype=np.float32)
+
+                save_heatmap_cv2(incident_ux, f"{save_prefix_path}_ux_incident.png", vmin=vmin_scale, vmax=vmax_scale)
+                save_heatmap_cv2(incident_uy, f"{save_prefix_path}_uy_incident.png", vmin=vmin_scale, vmax=vmax_scale)
 
                 # Save metadata (angle and velocity) to a JSON file
                 # Use the original, non-rounded angle and velocity for metadata accuracy
@@ -293,6 +305,19 @@ def main_script_logic():
         elif not csv_slice_path.exists() and not suppress_subprocess_output:
             print(f"⚠️ Skipping visualization for angle {angle}, velocity {velocity} due to missing CSV slice file: {csv_slice_path}")
 
+        # Clean up the case directory to save space
+        if case_dir.exists():
+            if not suppress_subprocess_output:
+                print(f"🧹 Cleaning up case directory: {case_dir}")
+            try:
+                shutil.rmtree(case_dir)
+                if not suppress_subprocess_output:
+                    print(f"✅ Successfully removed {case_dir}")
+            except Exception as e:
+                if not suppress_subprocess_output:
+                    print(f"❌ Failed to remove {case_dir}: {e}")
+        elif not suppress_subprocess_output:
+            print(f"ℹ️ Case directory {case_dir} not found for cleanup (already removed or never created).")
 
     total_script_end_time = time.time() # End general timer
     script_timings["total_script_duration"] = total_script_end_time - total_script_start_time # Store general timing
