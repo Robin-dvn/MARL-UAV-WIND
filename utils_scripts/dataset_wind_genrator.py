@@ -26,7 +26,7 @@ import sys
 import re # Added import
 import itertools # Added import
 
-from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays,plot_ux_uy # Updated imports
+from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays , plot_ux_uy # plot_ux_uy commented out
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
@@ -104,12 +104,14 @@ def main_script_logic():
     output_dir = Path("/home/rdavenne/OpenFOAM_cases/test_dataset")
     # freecad_script = Path("rotate_stl.py") # Assuming this is in the same dir or PATH - This variable is not used
     slice_script = Path("utils_scripts/slice_and_export.py") # Assuming this path is correct relative to execution
-    visualization_output_dir = output_dir / "visualizations" # Directory for saving plots
+    # visualization_output_dir = output_dir / "visualizations" # Directory for saving plots - Replaced by dataset_processed_dir
+    dataset_processed_dir = output_dir / "dataset_processed" # New directory for structured dataset
     crop_size_visualization = (230.0, 230.0)  # Taille du domaine autour de la ville pour la visualisation
     output_resolution_visualization = (2000, 2000) # Résolution de l'image de visualisation
 
     output_dir.mkdir(exist_ok=True)
-    visualization_output_dir.mkdir(exist_ok=True) # Create visualization directory
+    # visualization_output_dir.mkdir(exist_ok=True) # Create visualization directory - Replaced
+    dataset_processed_dir.mkdir(exist_ok=True) # Create processed dataset directory
 
     script_timings = {} # To store timings
     total_script_start_time = time.time() # Start general timer
@@ -227,12 +229,18 @@ def main_script_logic():
                     output_res=output_resolution_visualization
                 )
                 
-                # Define the prefix for the output .npy files
-                save_prefix_path = visualization_output_dir / f"wind_data_angle_{angle}_vel_{velocity}"
+                # Define the case-specific directory and ensure it exists
+                case_specific_dir = dataset_processed_dir / f"case_angle_{angle}_vel_{velocity}"
+                case_specific_dir.mkdir(parents=True, exist_ok=True)
+
+                # Define the prefix for the output files within the case-specific directory
+                save_prefix_path = case_specific_dir / "wind_data"
+                
                 plot_ux_uy(
                     ux_crop, uy_crop, angle,
-                    save_path=save_prefix_path.with_suffix(".png") # Save the plot as a PNG
-                )
+                    save_path=save_prefix_path.with_suffix("_visu.png") # Save the plot as a PNG
+                ) # Commented out as per discussion, focus on .npy and .json for dataset
+
                 # Export simulated wind data arrays (Ux_sim, Uy_sim)
                 export_simulated_data_arrays(
                     ux_crop=ux_crop,
@@ -248,8 +256,14 @@ def main_script_logic():
                     save_prefix_path=save_prefix_path
                 )
 
+                # Save metadata (angle and velocity) to a JSON file
+                metadata = {"angle_deg": float(angle), "velocity_mps": float(velocity)}
+                metadata_save_path = Path(f"{str(save_prefix_path)}_metadata.json") # Path will be case_specific_dir / "wind_data_metadata.json"
+                with open(metadata_save_path, 'w') as f_meta:
+                    json.dump(metadata, f_meta, indent=4)
+
                 if not suppress_subprocess_output:
-                    print(f"✅ Successfully saved 4 data arrays for angle {angle}, velocity {velocity} with prefix {save_prefix_path.name}")
+                    print(f"✅ Successfully saved 4 data arrays and 1 metadata JSON for angle {angle}, velocity {velocity} to {case_specific_dir}")
             except Exception as e:
                 if not suppress_subprocess_output:
                     print(f"❌ Failed to save one or more data arrays for angle {angle}, velocity {velocity}: {e}")
