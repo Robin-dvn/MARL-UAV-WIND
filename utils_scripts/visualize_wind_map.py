@@ -62,6 +62,35 @@ def plot_ux_uy(ux_crop, uy_crop, angle_deg, save_path=None): # Added save_path p
 
     print("✅ Image sauvegardée via to_image()")
 
+def export_simulated_data_arrays(ux_crop: np.ndarray, uy_crop: np.ndarray, save_prefix_path: Path):
+    """
+    Saves the cropped simulated Ux and Uy data arrays as .npy files.
+    No logging or extensive error handling.
+    """
+    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_ux_sim.npy"), ux_crop)
+    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_uy_sim.npy"), uy_crop)
+
+def export_incident_data_arrays(base_velocity: float, angle_deg: float, output_resolution: tuple[int, int], save_prefix_path: Path):
+    """
+    Calculates and saves uniform incident Ux and Uy data arrays (relative to geometry) as .npy files.
+    No logging or extensive error handling.
+    """
+    theta_rad = np.deg2rad(angle_deg)
+    
+    # Incident wind vector in global frame is (base_velocity, 0)
+    # Geometry's x-axis direction: (cos(theta), sin(theta))
+    # Geometry's y-axis direction: (-sin(theta), cos(theta))
+    # Ux_incident_local = V_global . geometry_x_axis
+    # Uy_incident_local = V_global . geometry_y_axis
+    
+    ux_incident_component = base_velocity * np.cos(theta_rad)
+    uy_incident_component = -base_velocity * np.sin(theta_rad) # Wind from X, so Uy relative to geometry is -V*sin(theta)
+
+    incident_ux_array = np.full(output_resolution, ux_incident_component, dtype=np.float32)
+    incident_uy_array = np.full(output_resolution, uy_incident_component, dtype=np.float32)
+
+    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_ux_incident.npy"), incident_ux_array)
+    np.save(save_prefix_path.with_suffix(f"{save_prefix_path.suffix}_uy_incident.npy"), incident_uy_array)
 
 # --- Exemple d'utilisation ---
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ import sys
 import re # Added import
 import itertools # Added import
 
-from visualize_wind_map import load_and_interpolate, extract_rotated_crop, plot_ux_uy # Added imports
+from visualize_wind_map import load_and_interpolate, extract_rotated_crop, export_simulated_data_arrays, export_incident_data_arrays # Updated imports
 
 # If on Windows, display an error and exit.
 if platform.system() == "Windows":
@@ -223,18 +223,33 @@ def main_script_logic():
                     ux_grid, uy_grid, 
                     center_2d_visualization, 
                     crop_size_visualization, 
-                    angle, # Utiliser l'angle de rotation actuel de la géométrie
+                    angle, # Utiliser l\'angle de rotation actuel de la géométrie
                     output_res=output_resolution_visualization
                 )
                 
-                plot_save_path = visualization_output_dir / f"wind_map_angle_{angle}_vel_{velocity}.png"
+                # Define the prefix for the output .npy files
+                save_prefix_path = visualization_output_dir / f"wind_data_angle_{angle}_vel_{velocity}"
                 
-                # Utiliser l'angle actuel pour le titre du graphique, car c'est l'angle de la géométrie
-                plot_ux_uy(ux_crop, uy_crop, angle, save_path=plot_save_path)
-                # Le message de succès est déjà dans plot_ux_uy si non supprimé
+                # Export simulated wind data arrays (Ux_sim, Uy_sim)
+                export_simulated_data_arrays(
+                    ux_crop=ux_crop,
+                    uy_crop=uy_crop,
+                    save_prefix_path=save_prefix_path 
+                )
+
+                # Export incident wind data arrays (Ux_incident, Uy_incident)
+                export_incident_data_arrays(
+                    base_velocity=float(velocity), 
+                    angle_deg=float(angle),
+                    output_resolution=output_resolution_visualization,
+                    save_prefix_path=save_prefix_path
+                )
+
+                if not suppress_subprocess_output:
+                    print(f"✅ Successfully saved 4 data arrays for angle {angle}, velocity {velocity} with prefix {save_prefix_path.name}")
             except Exception as e:
                 if not suppress_subprocess_output:
-                    print(f"❌ Failed to generate visualization for angle {angle}, velocity {velocity}: {e}")
+                    print(f"❌ Failed to save one or more data arrays for angle {angle}, velocity {velocity}: {e}")
         elif not geometry_center and not suppress_subprocess_output:
             print(f"⚠️ Skipping visualization for angle {angle}, velocity {velocity} due to missing geometry center.")
         elif not csv_slice_path.exists() and not suppress_subprocess_output:
