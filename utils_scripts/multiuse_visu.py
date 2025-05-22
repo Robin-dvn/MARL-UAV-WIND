@@ -36,5 +36,5 @@ def show_saved_wind_data_heatmap(folder_path: str):
     fig.show()
 
 if __name__ == "__main__":
-    dossier = "/home/rdavenne/OpenFOAM_cases/test_dataset/dataset_processed/case_angle_10.85_vel_10.19" 
+    dossier = r"\\wsl.localhost\Ubuntu\home\rdavenne\OpenFOAM_cases\test_dataset\dataset_processed\case_angle_174.35_vel_10.93" 
     show_saved_wind_data_heatmap(dossier)
