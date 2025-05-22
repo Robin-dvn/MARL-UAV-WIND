@@ -86,8 +86,8 @@ def export_incident_data_arrays(base_velocity: float, angle_deg: float, output_r
     ux_incident_component = base_velocity * np.cos(theta_rad)
     uy_incident_component = -base_velocity * np.sin(theta_rad) # Wind from X, so Uy relative to geometry is -V*sin(theta)
 
-    incident_ux_array = np.full(output_resolution, ux_incident_component, dtype=np.float32)
-    incident_uy_array = np.full(output_resolution, uy_incident_component, dtype=np.float32)
+    incident_ux_array = np.full(output_resolution, ux_incident_component, dtype=np.float16)
+    incident_uy_array = np.full(output_resolution, uy_incident_component, dtype=np.float16)
 
     np.save(f"{str(save_prefix_path)}_ux_incident.npy", incident_ux_array)
     np.save(f"{str(save_prefix_path)}_uy_incident.npy", incident_uy_array)

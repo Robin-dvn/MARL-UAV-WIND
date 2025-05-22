@@ -114,7 +114,7 @@ def main_script_logic():
     # visualization_output_dir = output_dir / "visualizations" # Directory for saving plots - Replaced by dataset_processed_dir
     dataset_processed_dir = output_dir / "dataset_processed" # New directory for structured dataset
     crop_size_visualization = (230.0, 230.0)  # Taille du domaine autour de la ville pour la visualisation
-    output_resolution_visualization = (2000, 2000) # Résolution de l'image de visualisation
+    output_resolution_visualization = (800, 800) # Résolution de l'image de visualisation
 
     output_dir.mkdir(exist_ok=True)
     # visualization_output_dir.mkdir(exist_ok=True) # Create visualization directory - Replaced
