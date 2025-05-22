@@ -293,7 +293,19 @@ def main_script_logic():
         elif not csv_slice_path.exists() and not suppress_subprocess_output:
             print(f"⚠️ Skipping visualization for angle {angle}, velocity {velocity} due to missing CSV slice file: {csv_slice_path}")
 
-
+                # Clean up the case directory to save space
+        if case_dir.exists():
+            if not suppress_subprocess_output:
+                print(f"🧹 Cleaning up case directory: {case_dir}")
+            try:
+                shutil.rmtree(case_dir)
+                if not suppress_subprocess_output:
+                    print(f"✅ Successfully removed {case_dir}")
+            except Exception as e:
+                if not suppress_subprocess_output:
+                    print(f"❌ Failed to remove {case_dir}: {e}")
+        elif not suppress_subprocess_output:
+            print(f"ℹ️ Case directory {case_dir} not found for cleanup (already removed or never created).")
     total_script_end_time = time.time() # End general timer
     script_timings["total_script_duration"] = total_script_end_time - total_script_start_time # Store general timing
 
